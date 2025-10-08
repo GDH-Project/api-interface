@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "proto/userpb";
+
+enum UserRole {
+  BASIC_USER = 0;
+  DATA_USER = 1;
+  ADMIN = 2;
+}
+enum CreateUserType {
+  basic_user = 0;
+  data_user = 1;
+};
+
+
+//message GetUserInfoByUserIDRequest {
+//  string id = 1;
+//}
+
+message GetUserInfoByEmailRequest {
+  string email = 1;
+}
+
+message GetUserInfoResponse {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+  UserRole role = 4;
+}
+
+message CreateUserRequest {
+  CreateUserType type = 1;
+  string name = 2;
+  string email = 3;
+  string password = 4;
+}
+
+message CreateUserResponse {
+  string user_id = 1;
+}
+
+message UpdateUserRequest {
+  string user_id = 1;
+  string name = 2;
+  string password = 3;
+}
+
+message UpdateUserResponse {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+  UserRole role = 4;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+  string password = 2;
+}
+
+message DeleteUserResponse {}
+
+service UserService{
+//  rpc GetUserInfoByUserID(GetUserInfoByUserIDRequest) returns (GetUserInfoResponse);
+  rpc GetUserInfoByEmail(GetUserInfoByEmailRequest) returns (GetUserInfoResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}
