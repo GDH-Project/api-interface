@@ -12,6 +12,8 @@ tags:
     description: "인증 및 유저 관련 서비스"
   - name: Base
     description: "기본 서비스"
+  - name: Device
+    description: "등록 장치 관리 서비스"
 paths:
   /api/v1/auth/sign-up:
     post:
@@ -151,6 +153,162 @@ paths:
           $ref: "#/components/responses/AuthRefreshToken"
         400:
           $ref: "#/components/responses/BadRequest"
+  /api/v1/device:
+    post:
+      summary: "장치 등록"
+      tags:
+        - Device
+      security:
+        - JWTAuth: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                meta:
+                  properties:
+                    device_name:
+                      description: "장비의 이름으로 등록자만 확인 가능합니다."
+                      type: string
+                      example: "동안구 스마트팜 A-B1-3"
+                    name:
+                      description: "사용자에게 노출되는 이름 입니다,"
+                      type: string
+                      example: "경기도 안양시 동안구 토마토 생육 정보"
+                    crop:
+                      description: "재배 작물 입니다."
+                      type: string
+                      example: "토마토"
+                    address:
+                      description: "장치가 위치한 주소지 입니다."
+                      type: object
+                      properties:
+                        state:
+                          description: "도/시"
+                          type: string
+                          example: "경기도"
+                        city:
+                          description: "시/군/구"
+                          type: string
+                          example: "안양시 동안구"
+                    update_cycle:
+                      description: "데이터 업데이트 주기 입니다.(분)"
+                      type: number
+                      example: 10
+                schema:
+                  description: "전송된 데이터의 JSON 에서 저장될 데이터와의 바인딩 값입니다."
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/DeviceDataBindingSchema"
+      responses:
+        201:
+          description: "장치 등록 성공"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        400:
+          $ref: "#/components/responses/BadRequest"
+  /api/v1/devices:
+    get:
+      summary: "장치 조회"
+      description: "등록된 장치들을 조회합니다."
+      tags:
+        - Device
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "장비 리스트 조회 성공"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeviceInfo"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/device/{deviceID}:
+    get:
+      summary: "{deviceID} 장치 조회"
+      description: "{deviceID}에 해당하는 장비의 정보를 조회합니다."
+      tags:
+        - Device
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: deviceID
+          description: "조회할 deviceID"
+          in: path
+          schema:
+            type: number
+      responses:
+        200:
+          description: "{deviceID} 장비 조회 성공"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceDetailInfo"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      summary: "장비 정보 업데이트"
+      tags:
+        - Device
+      security:
+        - JWTAuth: [ ]
+      parameters:
+        - name: deviceID
+          description: "조회할 deviceID"
+          in: path
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                meta:
+                  type: object
+                  properties:
+                    device_name:
+                      type: string
+                      example: "스마트팜 A-B1-2"
+                    update_cycle:
+                      type: number
+                      example: 60
+      responses:
+        200:
+          description: "장치 삭제 성공"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      summary: "장치 삭제"
+      tags:
+        - Device
+      security:
+        - JWTAuth: [ ]
+      parameters:
+        - name: deviceID
+          description: "조회할 deviceID"
+          in: path
+          schema:
+            type: number
+      responses:
+        200:
+          description: "장치 삭제 성공"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+
+
 
 components:
   securitySchemes:
@@ -160,6 +318,123 @@ components:
       bearerFormat: JWT
 
   schemas:
+    DeviceDataBindingSchema:
+      description: "장치의 데이터 바인딩 스키마"
+      type: object
+      properties:
+        key:
+          description: "장치에서 전송하는 원본 데이터 key 입니다."
+          type: string
+          example: "degree"
+        target:
+          description: "GDH에서 지정된 데이터 구분 key 입니다."
+          type: string
+          example: "degC"
+
+    DeviceMeta:
+      description: "장비 메타 데이터"
+      type: object
+      properties:
+        id:
+          type: number
+          description: "장치 고유 아이디"
+          example: 1
+        name:
+          type: string
+          description: "검색시 노출될 제목"
+          example: "경기도 안양시 동안구 토마토 생육 정보"
+        description:
+          type: string
+          description: "데이터에 대한 설명"
+          example: "경기도 안양시 동안구 소재의 스마트팜에서 재배되는 토마토의 생육 정보 데이터로 온도, 습도, 대기압, ph 정보로 구성되어 있습니다."
+        crop:
+          description: "작물"
+          type: string
+          example: "토마토"
+        address:
+          description: "지역"
+          type: object
+          properties:
+            state:
+              type: string
+              description: "도/시"
+              example: "경기도"
+            city:
+              type: string
+              description: "시/군/구"
+              example: "안양시 동안구"
+        update_cycle:
+          type: string
+          description: "데이터 업데이트 주기(분)"
+          example: "10"
+        last_data_updated_at:
+          type: string
+          description: "마지막 데이터 갱신 시간"
+          example: "2025-10-09T10:24:40Z"
+        created_at:
+          type: string
+          example: "2025-10-09T10:24:40Z"
+        updated_at:
+          type: string
+          description: "장비 정보 갱신 시간"
+          example: "2025-10-09T10:24:40Z"
+    DeviceInfo:
+      description: "장비 정보"
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/DeviceMeta"
+    DeviceDetailInfo:
+      description: "장치 상세 정보"
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/DeviceMeta"
+        schema:
+          type: array
+          items:
+             $ref: "#/components/schemas/DeviceDataBindingSchema"
+
+    SearchDataDetail:
+      description: "데이터 상세 정보"
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/DeviceMeta"
+        data:
+          type: object
+          properties:
+            head:
+              type: array
+              items:
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
+                  unit:
+                    type: string
+                  description:
+                    type: string
+            data_arr:
+              type: array
+              items:
+                properties:
+                  degC:
+                    type: number
+                    example: 35
+                  humidity:
+                    type: number
+                    example: 51.1
+                  ph:
+                    type: number
+                    example: 6.0
+
+    
+    
+    
+    
+    
     Token:
       type: object
       properties:
