@@ -174,7 +174,7 @@ paths:
                       type: string
                       example: "동안구 스마트팜 A-B1-3"
                     name:
-                      description: "사용자에게 노출되는 이름 입니다,"
+                      description: "사용자에게 노출되는 이름 입니다."
                       type: string
                       example: "경기도 안양시 동안구 토마토 생육 정보"
                     crop:
@@ -585,19 +585,19 @@ components:
           schema:
             $ref: "#/components/schemas/UserInfo"
     AuthRefreshToken:
-      description: 토큰 재발급
+      description: "토큰 재발급"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Token"
     NotFound:
-      description: not found 응답
+      description: "not found 응답"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
     BadRequest:
-      description: bad request 응답
+      description: "bad request 응답"
       content:
         application/json:
           schema:
@@ -605,7 +605,7 @@ components:
           example:
             message: "잘못된 요청 입니다."
     Unauthorized:
-      description: 인증 필요
+      description: "인증 필요"
       content:
         application/json:
           schema:
