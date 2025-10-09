@@ -4,8 +4,8 @@ info:
   description: GDH 기본 서버 스키마 입니다.
   version: 1.0.0
 servers:
-  - url: 'http://localhost:8081/api/v1'
-  - url: 'https://gdh.soplay.dev/api/v1'
+  - url: 'http://localhost:8081'
+  - url: 'https://gdh.soplay.dev'
 
 tags:
   - name: Auth
@@ -13,7 +13,7 @@ tags:
   - name: Base
     description: "기본 서비스"
 paths:
-  /auth/sign-up:
+  /api/v1/auth/sign-up:
     post:
       summary: "회원 가입"
       tags:
@@ -27,10 +27,13 @@ paths:
               properties:
                 name:
                   type: string
+                  example: "테스터"
                 email:
                   type: string
+                  example: "test@email.com"
                 password:
                   type: string
+                  example: "1q2w3e4r!"
                 type:
                   type: string
                   enum:
@@ -43,7 +46,7 @@ paths:
           $ref: "#/components/responses/UserInfo"
         400:
           $ref: "#/components/responses/BadRequest"
-  /user:
+  /api/v1/user:
     get:
       summary: "유저 정보 조회"
       tags:
@@ -69,8 +72,10 @@ paths:
               properties:
                 password:
                   type: string
+                  example: "변경할 비밀번호"
                 name:
                   type: string
+                  example: "변경할 닉네임"
       responses:
         200:
           $ref: "#/components/responses/UserInfo"
@@ -90,12 +95,13 @@ paths:
               properties:
                 password:
                   type: string
+                  example: "현재 비밀번호"
       responses:
         200:
           description: "회원 탈퇴 성공"
         401:
           $ref: "#/components/responses/Unauthorized"
-  /auth/singin:
+  /api/v1/auth/singin:
     post:
       summary: "로그인"
       tags:
@@ -126,7 +132,7 @@ paths:
           $ref: "#/components/responses/AuthSigninOk"
         400:
           $ref: "#/components/responses/BadRequest"
-  /auth/refresh:
+  /api/v1/auth/refresh:
     post:
       summary: "토큰 재발급"
       tags:
@@ -154,26 +160,33 @@ components:
       bearerFormat: JWT
 
   schemas:
-    GenerateToken:
+    Token:
       type: object
       properties:
         access_token:
           type: string
+          example: "access_token_string"
         refresh_token:
           type: string
+          example: "refresh_token_string"
     UserInfo:
       type: object
       properties:
         name:
           type: string
+          example: "테스터"
         email:
           type: string
+          example: "test@email.com"
         role:
           type: string
+          example: "basic"
         created_at:
           type: string
+          example: "2025-10-09T10:24:40Z"
         updated_at:
           type: string
+          example: "2025-10-09T10:24:40Z"
     Error:
       type: object
       properties:
@@ -187,7 +200,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/GenerateToken"
+            $ref: "#/components/schemas/Token"
     UserInfo:
       description: "유저 정보 조회 성공"
       content:
@@ -199,7 +212,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/GenerateToken"
+            $ref: "#/components/schemas/Token"
     NotFound:
       description: not found 응답
       content:
