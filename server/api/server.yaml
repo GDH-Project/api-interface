@@ -1,0 +1,224 @@
+openapi: 3.0.0
+info:
+  title: GDH-Server
+  description: GDH 기본 서버 스키마 입니다.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8081/api/v1'
+  - url: 'https://gdh.soplay.dev/api/v1'
+
+tags:
+  - name: Auth
+    description: "인증 및 유저 관련 서비스"
+  - name: Base
+    description: "기본 서비스"
+paths:
+  /auth/sign-up:
+    post:
+      summary: "회원 가입"
+      tags:
+        - Auth
+      requestBody:
+        description: "회원 가입에서 사용되는 'name'은 실제 이름이 아닌 닉네임 입니다."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - basic
+                    - device
+                  default: basic
+
+      responses:
+        200:
+          $ref: "#/components/responses/UserInfo"
+        400:
+          $ref: "#/components/responses/BadRequest"
+  /user:
+    get:
+      summary: "유저 정보 조회"
+      tags:
+        - Auth
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          $ref: "#/components/responses/UserInfo"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      summary: "유저 정보 업데이트"
+      tags:
+        - Auth
+      security:
+        - JWTAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                name:
+                  type: string
+      responses:
+        200:
+          $ref: "#/components/responses/UserInfo"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      summary: "회원 탈퇴"
+      tags:
+        - Auth
+      security:
+        - JWTAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        200:
+          description: "회원 탈퇴 성공"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+  /auth/singin:
+    post:
+      summary: "로그인"
+      tags:
+        - Auth
+      parameters:
+        - name: type
+          description: "로그인 타입"
+          schema:
+            type: string
+            enum:
+              - password
+            default: password
+          in: query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "test@email.com"
+                password:
+                  type: string
+                  example: "1q2w3e4r"
+      responses:
+        200:
+          $ref: "#/components/responses/AuthSigninOk"
+        400:
+          $ref: "#/components/responses/BadRequest"
+  /auth/refresh:
+    post:
+      summary: "토큰 재발급"
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  required: true
+      responses:
+        200:
+          $ref: "#/components/responses/AuthRefreshToken"
+        400:
+          $ref: "#/components/responses/BadRequest"
+
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    GenerateToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+    UserInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+
+
+  responses:
+    AuthSigninOk:
+      description: "인증 성공"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GenerateToken"
+    UserInfo:
+      description: "유저 정보 조회 성공"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UserInfo"
+    AuthRefreshToken:
+      description: 토큰 재발급
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GenerateToken"
+    NotFound:
+      description: not found 응답
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: bad request 응답
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "잘못된 요청 입니다."
+    Unauthorized:
+      description: 인증 필요
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: "인증이 필요합니다."
