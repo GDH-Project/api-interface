@@ -11,7 +11,7 @@ tags:
   - name: Auth
     description: "인증 및 유저 관련 서비스"
   - name: Base
-    description: "기본 서비스"
+    description: "검색 및 기본 서비스"
   - name: Device
     description: "등록 장치 관리 서비스"
 paths:
@@ -103,7 +103,7 @@ paths:
           description: "회원 탈퇴 성공"
         401:
           $ref: "#/components/responses/Unauthorized"
-  /api/v1/auth/singin:
+  /api/v1/auth/sing-in:
     post:
       summary: "로그인"
       tags:
@@ -111,6 +111,7 @@ paths:
       parameters:
         - name: type
           description: "로그인 타입"
+          required: true
           schema:
             type: string
             enum:
@@ -307,16 +308,108 @@ paths:
           $ref: "#/components/responses/BadRequest"
         401:
           $ref: "#/components/responses/Unauthorized"
+  /api/v1/rank:
+    get:
+      summary: "인기/최신등록/최신업데이트 데이터 조회"
+      tags:
+        - Base
+      parameters:
+        - name: type
+          description: "조회 데이터 선택 필드"
+          required: true
+          in: query
+          schema:
+            type: string
+            enum:
+              - viewCount
+              - lastCreated
+              - lastUpdateData
+            default: viewCount
+      responses:
+        200:
+          description: "조회 성공, 각 데이터 별로 오름차순 정렬된 데이터가 반환된다."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeviceMeta"
+  /api/v1/search:
+    get:
+      summary: "검색"
+      tags:
+        - Base
+      parameters:
+        - name: q
+          in: query
+          description: "검색어"
+          required: true
+          schema:
+            type: string
 
-
-
+          example: "스마트팜"
+        - name: corp
+          in: query
+          description: "작물 종류"
+          schema:
+            type: string
+          example: "토마토"
+        - name: state
+          in: query
+          description: "도/시"
+          schema:
+            type: string
+          example: "경기도"
+        - name: city
+          in: query
+          description: "시/군/구"
+          schema:
+            type: string
+          example: "안양시 동안구"
+      responses:
+        200:
+          description: "검색 응답 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SearchData"
+        404:
+          $ref: "#/components/responses/NotFound"
+  /api/v1/search/{deviceID}:
+    get:
+      summary: "{deviceID} 상세 데이터 조회"
+      tags:
+        - Base
+      parameters:
+        - name: deviceID
+          in: path
+          description: "조회 장치 ID"
+          schema:
+            type: number
+            example: 1
+      responses:
+        200:
+          description: "조회 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SearchDataDetail"
+        404:
+          $ref: "#/components/responses/NotFound"
 components:
   securitySchemes:
     JWTAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     DeviceDataBindingSchema:
       description: "장치의 데이터 바인딩 스키마"
@@ -367,6 +460,10 @@ components:
           type: string
           description: "데이터 업데이트 주기(분)"
           example: "10"
+        view_count:
+          type: number
+          description: "조회수"
+          example: 5000
         last_data_updated_at:
           type: string
           description: "마지막 데이터 갱신 시간"
@@ -394,13 +491,25 @@ components:
           type: array
           items:
              $ref: "#/components/schemas/DeviceDataBindingSchema"
-
+    SearchData:
+      description: "데이터 검색 응답"
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/DeviceMeta"
     SearchDataDetail:
       description: "데이터 상세 정보"
       type: object
       properties:
         meta:
           $ref: "#/components/schemas/DeviceMeta"
+        file:
+          type: object
+          properties:
+            csv:
+              type: string
+              format: url
+              example: "http://s3.localhost/adf/2025-10-09-토마토.csv"
         data:
           type: object
           properties:
@@ -410,12 +519,13 @@ components:
                 properties:
                   key:
                     type: string
-                  value:
-                    type: number
+                    example: "degC"
                   unit:
                     type: string
+                    example: "°C"
                   description:
                     type: string
+                    example: "섭씨 온도 입니다."
             data_arr:
               type: array
               items:
@@ -429,12 +539,6 @@ components:
                   ph:
                     type: number
                     example: 6.0
-
-    
-    
-    
-    
-    
     Token:
       type: object
       properties:
@@ -467,8 +571,6 @@ components:
       properties:
         message:
           type: string
-
-
   responses:
     AuthSigninOk:
       description: "인증 성공"
