@@ -42,7 +42,7 @@ paths:
                   default: basic
 
       responses:
-        200:
+        201:
           $ref: "#/components/responses/UserInfo"
         400:
           $ref: "#/components/responses/BadRequest"
