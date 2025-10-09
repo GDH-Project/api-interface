@@ -284,7 +284,7 @@ paths:
                       example: 60
       responses:
         200:
-          description: "장치 삭제 성공"
+          description: "장치 업데이트 성공"
         400:
           $ref: "#/components/responses/BadRequest"
         401:
