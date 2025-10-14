@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "proto/userpb";
+option go_package = "userpb";
 
 enum UserRole {
   BASIC_USER = 0;
