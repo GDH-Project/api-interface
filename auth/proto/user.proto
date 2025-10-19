@@ -19,6 +19,15 @@ enum CreateUserType {
 //  string id = 1;
 //}
 
+message GetCheckCreateUserReqeust {
+  string email = 1;
+  string name = 2;
+}
+
+message GetCheckCreateUserResponse{
+  bool ok = 1;
+}
+
 message GetUserInfoByEmailRequest {
   string email = 1;
 }
@@ -63,6 +72,7 @@ message DeleteUserResponse {}
 
 service UserService{
   //  rpc GetUserInfoByUserID(GetUserInfoByUserIDRequest) returns (GetUserInfoResponse);
+  rpc CheckCreateUser(GetCheckCreateUserReqeust) returns (GetCheckCreateUserResponse);
   rpc GetUserInfoByEmail(GetUserInfoByEmailRequest) returns (GetUserInfoResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
