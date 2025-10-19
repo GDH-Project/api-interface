@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "userpb";
+option go_package = "/userpb";
 
 enum UserRole {
   BASIC_USER = 0;
@@ -62,7 +62,7 @@ message DeleteUserRequest {
 message DeleteUserResponse {}
 
 service UserService{
-//  rpc GetUserInfoByUserID(GetUserInfoByUserIDRequest) returns (GetUserInfoResponse);
+  //  rpc GetUserInfoByUserID(GetUserInfoByUserIDRequest) returns (GetUserInfoResponse);
   rpc GetUserInfoByEmail(GetUserInfoByEmailRequest) returns (GetUserInfoResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
