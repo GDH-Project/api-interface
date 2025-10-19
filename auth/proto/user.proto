@@ -47,7 +47,6 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  string user_id = 1;
 }
 
 message UpdateUserRequest {
